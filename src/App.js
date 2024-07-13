@@ -28,7 +28,7 @@ const App = () => {
 
   function renderNewExperiment() {
     setDbIndex((prevIndex) => prevIndex + 1);
-    if (dbIndex === 1) {
+    if (dbIndex === 9) {
       setEndExperiment(true);
       console.log("Start Experiment");
     }
