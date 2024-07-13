@@ -1,6 +1,5 @@
-import React, { Component } from "react";
+import React from "react";
 import { Typography, Container, Box, Button } from "@mui/material";
-import db from "../../Data/db";
 
 function ImgSumScreen({
   imgLink,

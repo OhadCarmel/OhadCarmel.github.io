@@ -1,14 +1,10 @@
-// App.js
 import React, { useEffect, useRef, useState } from "react";
-// import BookListing from "./BookListing";
-// import BookDetails from "./BookDetails";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import axios from "axios";
-import { AppBar } from "@mui/material";
-// import FilterOptions from "./FilterOptions";
 import WelcomePage from "./Screens/WelcomePage/WelcomePage";
 import ExperimentScreen from "./Screens/ExperimentScreen/ExperimentScreen";
 import {deployServerPath, localServerPath} from './constans';
+import  EndOfExperiment  from "./Screens/EndOfIterationScreen/EndOfExperimentScreen";
 
 const App = () => {
   axios.defaults.withCredentials = true;
@@ -16,55 +12,53 @@ const App = () => {
   const baseURL = useLocalServer ? localServerPath : deployServerPath;
 
   const [userId, setUserId] = useState([]);
-  const [books, setBooks] = useState([]);
   const [startExperiment, setStartExperiment] = useState(false);
+  const [endExperiment, setEndExperiment] = useState(false);
   const [wordByWord, setWordByWord] = useState(false);
   const [markHallucinations, setmarkHallucinations] = useState(false);
   const [markLowConfidence, setmarkLowConfidence] = useState(false);
   const [dbIndex, setDbIndex] = useState(0);
   const [dab, setDab] = useState([]);
   const imageIterations = useRef([]);
-
+  const [isEnableToStart, setIsEnableToStart] = useState(false);
+  const hasData = useRef(false);
   function handleStart() {
     setStartExperiment(true);
   }
 
   function renderNewExperiment() {
     setDbIndex((prevIndex) => prevIndex + 1);
-    console.log("Start Experiment");
+    if (dbIndex === 1) {
+      setEndExperiment(true);
+      console.log("Start Experiment");
+    }
   }
   useEffect(() => {
-    getUser();
-    getBooks();
-    getProbes();
-  }, []);
+    if(!useRef.current) {getProbes()};
+  },[]);
 
   useEffect(()=> {
-    if(dbIndex===2){
-      console.log('sending');
+    if(dbIndex===10){
       console.log('imageIterations');
       console.log(imageIterations.current); 
       sendImageIterations();
       setDbIndex(0)
     } else {
-      console.log(`didn't send ${dbIndex}`);
+      console.log('dbIndex', dbIndex);
     }
   },[dbIndex])
-  const getBooks = () => {
-    // axios
-    //   .get(`${baseURL}/books`)
-    //   .then((response) => setBooks(response.data.Books))
-    //   .catch((error) => console.error(error));
-  };
 
   const getProbes = () => {
-    console.log('here');
+    if(hasData.current) return;
+    hasData.current = true;
     axios
       .get(`${baseURL}/random-docs`)
       .then((response) => {
-        console.log('response')
         console.log(response.data)
-        setDab(response.data)})
+        setDab(response.data.randomDocs);
+        setUserId(response.data.userId);
+        setIsEnableToStart(true)
+      })
       .catch((error) => console.error(error));
   };
 
@@ -94,86 +88,9 @@ const App = () => {
       .catch((error) => {
         console.error("Error submitting data:", error);
       });};
-
-  const postBook = (title, author, publicationYear, description) => {
-    axios
-      .post(
-        `${baseURL}/books`,
-        {
-          book: { title, author, publicationYear, description },
-        },
-        {
-          headers: {
-            "content-type": "application/x-www-form-urlencoded",
-          },
-        }
-      )
-      .then((response) => {
-        setBooks([...books, response.data.book]);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-  const getUser = () => {
-    axios
-      .get(`${baseURL}/user`)
-      .then((response) => {
-
-        setUserId(response.data.id);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-
-  const handleFilterChange = (publicationYear) => {
-    const params = [];
-    if (publicationYear) {
-      params.push(`after=${publicationYear[0]}&before=${publicationYear[1]}`);
-    }
-
-    let url = `${baseURL}/books${params ? `?${params.join("&")}` : ``}`;
-    axios
-      .get(url)
-      .then((response) => {
-        setBooks(response.data.Books);
-      })
-      .catch((error) => console.error(error));
-  };
-
-  const renderToolBar = () => {
-    return (
-      <AppBar position="sticky" color="inherit">
-        {/* <FilterOptions handleFilterChange={handleFilterChange} /> */}
-      </AppBar>
-    );
-  };
-
-  const renderNormal = () => (
-    <div className="App">
-      {renderToolBar()}
-      <Router>
-        <Routes>
-          {/* <Route
-            path="/"
-            element={
-              // <BookListing
-              //   books={books}
-              //   postBook={postBook}
-              //   showTopReviewerBadge={
-              //     true // need to be changed the condition based on the instructions
-              //   }
-              // />
-            }
-          /> */}
-          {/* <Route path="/book/:bookId" element={<BookDetails />} /> */}
-        </Routes>
-      </Router>
-    </div>
-  );
-
+      console.log(`userId: ${userId}`);
   const renderExp = () =>
+    endExperiment ? (<EndOfExperiment userId={userId}/>) :
     !startExperiment ? (
       <WelcomePage
         handleStart={handleStart}
@@ -183,6 +100,7 @@ const App = () => {
         handleMarkHallucinations={setmarkHallucinations}
         markLowConfidence={markLowConfidence}
         handleMarkLowConfidence={setmarkLowConfidence}
+        isEnableToStart={isEnableToStart}
       />
     ) : (
       <ExperimentScreen

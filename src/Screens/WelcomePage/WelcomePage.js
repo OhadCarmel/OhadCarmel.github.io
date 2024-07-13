@@ -17,6 +17,7 @@ function WelcomePage({
   handleMarkHallucinations,
   markLowConfidence,
   handleMarkLowConfidence,
+  isEnableToStart,
 }) {
 
   
@@ -63,7 +64,7 @@ function WelcomePage({
         }
         label="Display low confidence marked"
       />
-      <Button variant="contained" color="primary" onClick={handleStart}>
+      <Button variant="contained" color="primary" onClick={handleStart} disabled={!isEnableToStart}>
         Start
       </Button>
     </Container>

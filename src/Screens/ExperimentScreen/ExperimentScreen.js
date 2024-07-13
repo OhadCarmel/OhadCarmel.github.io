@@ -7,11 +7,9 @@ import {
   Slider,
   Box,
 } from "@mui/material";
-import db from "../../Data/db";
 import CustomText from "../../components/CustomText";
 import ImgSumScreen from "../ImgSumScreen.js/ImgSumScreen";
 import { ImageIteration, ProbeIteration} from './../../types';  
-import axios from "axios";
 import setTimeDelayForWords from "../../helpers";
 
 
@@ -37,7 +35,6 @@ function ExperimentScreen({
   const [shouldShowProbe, setShouldShowProbe] = useState(false);
   const [displayedText, setDisplayedText] = useState("");
   const words = description.split(" "); // Split the description into words
-  const baseURL = "http://localhost:3080";
   const startTime = useRef(null);
 
   const imageIteration = useRef(new ImageIteration());
@@ -66,7 +63,6 @@ function ExperimentScreen({
   const initNewExperiment = () => {
     setValue(0);
     setIndex(0);
-    // setPoints(0);
     setShouldShowImage(false);
     setShouldShowProbe(false);
     renderNewExperiment();
@@ -139,13 +135,13 @@ function ExperimentScreen({
     const updatedProbesAndAnswers = [...probesAndAnswers];
     updatedProbesAndAnswers[index] = {
       ...updatedProbesAndAnswers[index],
-      probe: db[0].probes[index].probe,
+      probe: probesAndAnswers[index].probe,
       selectedAnswer,
-      isCorrect: selectedAnswer === db[0].probes[index].label,
+      isCorrect: selectedAnswer === probesAndAnswers[index].label,
       time: timeTaken / 1000,
       gainedPoints: calculatePoints(probe),
     };
-
+    console.log("updatedProbesAndAnswers", updatedProbesAndAnswers);
     if (index === 0){
     imageIteration.current.firstProbe.setAnswer(selectedAnswer);
     imageIteration.current.firstProbe.setAnswerTime(timeTaken / 1000);
