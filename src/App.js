@@ -108,8 +108,8 @@ const App = () => {
         secondProbe={dab[dbIndex].probes[1]}
         description={
           markHallucinations
-            ? dab[dbIndex].hallucinations
-            : dab[dbIndex].description
+            ? dab[dbIndex].hallucinations.replace("</s>", " ").replace("<0x0A><0x0A>", " ").replace("<0x0A>", " ")
+            : dab[dbIndex].description.replace("</s>", " ").replace("<0x0A><0x0A>", " ").replace("<0x0A>", " ")
         }
         imgLink={dab[dbIndex].image_link}
         renderNewExperiment={renderNewExperiment}
